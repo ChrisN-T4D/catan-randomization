@@ -1,4 +1,4 @@
-import { TERRAIN_COLORS, TERRAIN_ICONS, TERRAIN_LABELS } from '../utils/constants';
+import { TERRAIN_COLORS, TERRAIN_ICONS, TERRAIN_LABELS, TERRAIN_TYPES } from '../utils/constants';
 
 const HEX_SIZE = 52;
 
@@ -18,38 +18,61 @@ function hexPoints(cx, cy, size) {
   }).join(' ');
 }
 
-export default function HexTile({ cx, cy, terrain, number }) {
+export default function HexTile({ cx, cy, terrain, number, hasPort }) {
   const fill = TERRAIN_COLORS[terrain];
   const icon = TERRAIN_ICONS[terrain];
   const label = TERRAIN_LABELS[terrain];
   const isHighProb = number === 6 || number === 8;
+  const isGold = terrain === TERRAIN_TYPES.GOLD;
+  const isSea = terrain === TERRAIN_TYPES.SEA;
+  const hideLabel = isSea && hasPort;
 
   const dotCount = number ? (number <= 7 ? number - 1 : 13 - number) : 0;
 
+  const goldId = isGold ? `gold-grad-${cx}-${cy}` : null;
+
   return (
     <g className="hex-tile">
+      {isGold && (
+        <defs>
+          <radialGradient id={goldId} cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stopColor="#fff8b0" />
+            <stop offset="40%" stopColor="#ffd700" />
+            <stop offset="100%" stopColor="#b8860b" />
+          </radialGradient>
+        </defs>
+      )}
       <polygon
         points={hexPoints(cx, cy, HEX_SIZE)}
-        fill={fill}
-        stroke="#5c4a32"
-        strokeWidth="2.5"
+        fill={isGold ? `url(#${goldId})` : fill}
+        stroke={isGold ? '#b8860b' : '#5c4a32'}
+        strokeWidth={isGold ? 3.5 : 2.5}
       />
       <polygon
         points={hexPoints(cx, cy, HEX_SIZE - 3)}
         fill="none"
-        stroke="rgba(255,255,255,0.15)"
-        strokeWidth="1"
+        stroke={isGold ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.15)'}
+        strokeWidth={isGold ? 1.5 : 1}
       />
+      {isGold && (
+        <>
+          <line x1={cx - 8} y1={cy - 22} x2={cx - 5} y2={cy - 16} stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" />
+          <line x1={cx + 14} y1={cy - 10} x2={cx + 10} y2={cy - 6} stroke="rgba(255,255,255,0.5)" strokeWidth="1" />
+          <line x1={cx - 16} y1={cy + 4} x2={cx - 12} y2={cy + 8} stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+        </>
+      )}
 
-      <text
-        x={cx}
-        y={cy - 12}
-        textAnchor="middle"
-        fontSize="20"
-        className="hex-icon"
-      >
-        {icon}
-      </text>
+      {!hideLabel && (
+        <text
+          x={cx}
+          y={cy - 12}
+          textAnchor="middle"
+          fontSize="20"
+          className="hex-icon"
+        >
+          {icon}
+        </text>
+      )}
 
       {number && (
         <>
@@ -85,7 +108,7 @@ export default function HexTile({ cx, cy, terrain, number }) {
         </>
       )}
 
-      {!number && (
+      {!number && !hideLabel && (
         <text
           x={cx}
           y={cy + 12}

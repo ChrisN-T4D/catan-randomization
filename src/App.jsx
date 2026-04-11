@@ -1,23 +1,43 @@
 import { useState, useCallback } from 'react';
 import Board from './components/Board';
+import Settings from './components/Settings';
 import { generateBoard } from './utils/randomizer';
-import { TERRAIN_ICONS, TERRAIN_LABELS, TERRAIN_COLORS, TERRAIN_TYPES } from './utils/constants';
+import { clonePreset } from './utils/presets';
+import { validateConfig } from './utils/boardConfig';
+import {
+  TERRAIN_ICONS,
+  TERRAIN_LABELS,
+  TERRAIN_COLORS,
+  ALL_TERRAIN_TYPES,
+} from './utils/constants';
 import './App.css';
 
-const TERRAIN_ORDER = [
-  TERRAIN_TYPES.FOREST,
-  TERRAIN_TYPES.FIELDS,
-  TERRAIN_TYPES.PASTURE,
-  TERRAIN_TYPES.HILLS,
-  TERRAIN_TYPES.MOUNTAINS,
-  TERRAIN_TYPES.DESERT,
-];
-
 function App() {
-  const [board, setBoard] = useState(() => generateBoard());
+  const initialConfig = clonePreset('base');
+  const [config, setConfig] = useState(initialConfig);
+  const [board, setBoard] = useState(() => ({
+    ...generateBoard(initialConfig),
+    rowSizes: initialConfig.rowSizes,
+  }));
+
+  const errors = validateConfig(config);
+  const canGenerate = errors.length === 0;
+
+  const activeTerrain = ALL_TERRAIN_TYPES.filter(
+    (t) => (config.terrainCounts[t] ?? 0) > 0
+  );
 
   const handleRandomize = useCallback(() => {
-    setBoard(generateBoard());
+    if (canGenerate) {
+      setBoard({
+        ...generateBoard(config),
+        rowSizes: [...config.rowSizes],
+      });
+    }
+  }, [config, canGenerate]);
+
+  const handleConfigChange = useCallback((newConfig) => {
+    setConfig(newConfig);
   }, []);
 
   return (
@@ -29,19 +49,29 @@ function App() {
 
       <main className="app-main">
         <div className="board-container">
-          <Board hexes={board.hexes} ports={board.ports} />
+          <Board
+            hexes={board.hexes}
+            ports={board.ports}
+            rowSizes={board.rowSizes}
+          />
         </div>
 
         <div className="controls">
-          <button className="randomize-btn" onClick={handleRandomize}>
+          <button
+            className="randomize-btn"
+            onClick={handleRandomize}
+            disabled={!canGenerate}
+          >
             <span className="btn-icon">🎲</span>
             Randomize Board
           </button>
 
+          <Settings config={config} onChange={handleConfigChange} />
+
           <div className="legend">
             <h3>Resources</h3>
             <div className="legend-grid">
-              {TERRAIN_ORDER.map((terrain) => (
+              {activeTerrain.map((terrain) => (
                 <div key={terrain} className="legend-item">
                   <span
                     className="legend-swatch"
@@ -60,6 +90,7 @@ function App() {
               <li>Terrain tiles are shuffled randomly</li>
               <li>Number tokens are placed so that 6 and 8 are never adjacent</li>
               <li>Port types and positions are randomized</li>
+              <li>Choose a preset or fully customize your board</li>
             </ul>
           </div>
         </div>

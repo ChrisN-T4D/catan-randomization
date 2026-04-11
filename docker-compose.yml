@@ -1,0 +1,7 @@
+services:
+  catan-randomization:
+    build: .
+    container_name: catan-randomization
+    ports:
+      - "3000:80"
+    restart: unless-stopped

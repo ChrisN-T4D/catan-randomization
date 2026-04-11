@@ -5,44 +5,22 @@ export const TERRAIN_TYPES = {
   HILLS: 'hills',
   MOUNTAINS: 'mountains',
   DESERT: 'desert',
+  GOLD: 'gold',
+  SEA: 'sea',
 };
 
-// Standard Catan terrain distribution (19 tiles)
-export const TERRAIN_DISTRIBUTION = [
-  TERRAIN_TYPES.FOREST,
-  TERRAIN_TYPES.FOREST,
-  TERRAIN_TYPES.FOREST,
-  TERRAIN_TYPES.FOREST,
-  TERRAIN_TYPES.FIELDS,
-  TERRAIN_TYPES.FIELDS,
-  TERRAIN_TYPES.FIELDS,
-  TERRAIN_TYPES.FIELDS,
-  TERRAIN_TYPES.PASTURE,
-  TERRAIN_TYPES.PASTURE,
-  TERRAIN_TYPES.PASTURE,
-  TERRAIN_TYPES.PASTURE,
-  TERRAIN_TYPES.HILLS,
-  TERRAIN_TYPES.HILLS,
-  TERRAIN_TYPES.HILLS,
-  TERRAIN_TYPES.MOUNTAINS,
-  TERRAIN_TYPES.MOUNTAINS,
-  TERRAIN_TYPES.MOUNTAINS,
-  TERRAIN_TYPES.DESERT,
-];
-
-// Number tokens placed on non-desert tiles (18 tokens)
-export const NUMBER_TOKENS = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12];
-
-// Board layout: number of hexes per row
-export const ROW_SIZES = [3, 4, 5, 4, 3];
+// Terrains that don't receive a number token
+export const NON_NUMBERED_TERRAINS = new Set([TERRAIN_TYPES.DESERT, TERRAIN_TYPES.SEA]);
 
 export const TERRAIN_COLORS = {
   [TERRAIN_TYPES.FOREST]: '#2d6a2e',
-  [TERRAIN_TYPES.FIELDS]: '#e6b422',
+  [TERRAIN_TYPES.FIELDS]: '#c89320',
   [TERRAIN_TYPES.PASTURE]: '#7ec850',
   [TERRAIN_TYPES.HILLS]: '#c4622d',
   [TERRAIN_TYPES.MOUNTAINS]: '#8b8b8b',
   [TERRAIN_TYPES.DESERT]: '#e8d5a3',
+  [TERRAIN_TYPES.GOLD]: '#ffd700',
+  [TERRAIN_TYPES.SEA]: '#2a7ab5',
 };
 
 export const TERRAIN_LABELS = {
@@ -52,6 +30,8 @@ export const TERRAIN_LABELS = {
   [TERRAIN_TYPES.HILLS]: 'Brick',
   [TERRAIN_TYPES.MOUNTAINS]: 'Ore',
   [TERRAIN_TYPES.DESERT]: 'Desert',
+  [TERRAIN_TYPES.GOLD]: 'Gold',
+  [TERRAIN_TYPES.SEA]: 'Sea',
 };
 
 export const TERRAIN_ICONS = {
@@ -61,9 +41,10 @@ export const TERRAIN_ICONS = {
   [TERRAIN_TYPES.HILLS]: '🧱',
   [TERRAIN_TYPES.MOUNTAINS]: '⛰️',
   [TERRAIN_TYPES.DESERT]: '🏜️',
+  [TERRAIN_TYPES.GOLD]: '💰',
+  [TERRAIN_TYPES.SEA]: '🌊',
 };
 
-// Port types
 export const PORT_TYPES = {
   GENERIC: 'generic',
   WOOD: 'wood',
@@ -72,19 +53,6 @@ export const PORT_TYPES = {
   BRICK: 'brick',
   ORE: 'ore',
 };
-
-// Standard port distribution (9 ports)
-export const PORT_DISTRIBUTION = [
-  PORT_TYPES.GENERIC,
-  PORT_TYPES.GENERIC,
-  PORT_TYPES.GENERIC,
-  PORT_TYPES.GENERIC,
-  PORT_TYPES.WOOD,
-  PORT_TYPES.WHEAT,
-  PORT_TYPES.SHEEP,
-  PORT_TYPES.BRICK,
-  PORT_TYPES.ORE,
-];
 
 export const PORT_LABELS = {
   [PORT_TYPES.GENERIC]: '3:1',
@@ -104,17 +72,23 @@ export const PORT_COLORS = {
   [PORT_TYPES.ORE]: '#b0b0b0',
 };
 
-// 9 port positions around the board perimeter.
-// Each port is defined by the hex index it's adjacent to and the edge direction (0-5).
-// Edge 0 = top, going clockwise: 1=top-right, 2=bottom-right, 3=bottom, 4=bottom-left, 5=top-left
-export const PORT_POSITIONS = [
-  { hexIndex: 0, edge: 5 },
-  { hexIndex: 1, edge: 0 },
-  { hexIndex: 2, edge: 1 },
-  { hexIndex: 6, edge: 1 },
-  { hexIndex: 11, edge: 2 },
-  { hexIndex: 15, edge: 2 },
-  { hexIndex: 17, edge: 3 },
-  { hexIndex: 16, edge: 4 },
-  { hexIndex: 12, edge: 4 },
+// Ordered list of all terrain types for UI display
+export const ALL_TERRAIN_TYPES = [
+  TERRAIN_TYPES.FOREST,
+  TERRAIN_TYPES.FIELDS,
+  TERRAIN_TYPES.PASTURE,
+  TERRAIN_TYPES.HILLS,
+  TERRAIN_TYPES.MOUNTAINS,
+  TERRAIN_TYPES.DESERT,
+  TERRAIN_TYPES.GOLD,
+  TERRAIN_TYPES.SEA,
+];
+
+export const ALL_PORT_TYPES = [
+  PORT_TYPES.GENERIC,
+  PORT_TYPES.WOOD,
+  PORT_TYPES.WHEAT,
+  PORT_TYPES.SHEEP,
+  PORT_TYPES.BRICK,
+  PORT_TYPES.ORE,
 ];
