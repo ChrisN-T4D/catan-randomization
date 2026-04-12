@@ -10,7 +10,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: catan-randomization:latest
+    # No `image:` — avoids Docker Hub pull for a non-existent repo; Compose builds locally.
     container_name: catan-randomization
     restart: unless-stopped
     networks:
