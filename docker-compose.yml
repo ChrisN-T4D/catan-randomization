@@ -1,38 +1,41 @@
-# Static Catan board app — no published host ports; Traefik reaches this service on traefik_proxy only.
+# Static Catan board — Traefik only (no host ports). Build locally (no registry image).
 #
-# Set HOST in Portainer stack environment (or a .env file beside this compose file):
+# Stack env in Portainer (recommended):
 #   HOST=your.public.hostname
+# If HOST is omitted, the default below is used so Traefik still gets a valid Host() rule.
 #
-# Requires an external network named traefik_proxy (same network your Traefik container uses).
+# Checklist if the site does not load:
+#   - DNS A/AAAA for HOST → your Traefik public IP
+#   - Traefik container on network "traefik_proxy" (same name as below)
+#   - Stack env HOST matches the URL you open in the browser
+#   - In Traefik dashboard: router "cr" should be green (cert resolver "le" must match your Traefik static config)
+#   - docker logs on this container; curl from Traefik host: docker exec traefik wget -qO- http://<container-ip>/
 
 services:
   catan-randomization:
     build:
       context: .
       dockerfile: Dockerfile
-    # No `image:` — avoids Docker Hub pull for a non-existent repo; Compose builds locally.
     container_name: catan-randomization
     restart: unless-stopped
     networks:
       - traefik_proxy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     labels:
       traefik.enable: "true"
       traefik.docker.network: traefik_proxy
 
-      # HTTPS router (TLS terminates at Traefik; this container only serves plain HTTP on 80)
       traefik.http.routers.cr.entrypoints: websecure
-      traefik.http.routers.cr.rule: Host(`${HOST}`)
+      traefik.http.routers.cr.rule: Host(`${HOST:-your.public.hostname}`)
       traefik.http.routers.cr.tls.certresolver: le
       traefik.http.routers.cr.service: cr-svc
 
       traefik.http.services.cr-svc.loadbalancer.server.port: "80"
-
-      # Namespaced middleware so this stack does not collide with other services using "limit"
-      traefik.http.routers.cr.middlewares: cr-limit@docker
-      traefik.http.middlewares.cr-limit.buffering.maxRequestBodyBytes: "10737418240"
-      traefik.http.middlewares.cr-limit.buffering.memRequestBodyBytes: "200000000"
-      traefik.http.middlewares.cr-limit.buffering.maxResponseBodyBytes: "10737418240"
-      traefik.http.middlewares.cr-limit.buffering.memResponseBodyBytes: "200000000"
 
 networks:
   traefik_proxy:
