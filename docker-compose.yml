@@ -1,26 +1,38 @@
+# Static Catan board app — no published host ports; Traefik reaches this service on traefik_proxy only.
+#
+# Set HOST in Portainer stack environment (or a .env file beside this compose file):
+#   HOST=your.public.hostname
+#
+# Requires an external network named traefik_proxy (same network your Traefik container uses).
+
 services:
   catan-randomization:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: catan-randomization:latest
     container_name: catan-randomization
     restart: unless-stopped
     networks:
-      - default
       - traefik_proxy
     labels:
-      traefik.enable: true
+      traefik.enable: "true"
       traefik.docker.network: traefik_proxy
 
+      # HTTPS router (TLS terminates at Traefik; this container only serves plain HTTP on 80)
       traefik.http.routers.cr.entrypoints: websecure
       traefik.http.routers.cr.rule: Host(`${HOST}`)
       traefik.http.routers.cr.tls.certresolver: le
-      traefik.http.routers.cr.service: cr
-      traefik.http.services.cr.loadbalancer.server.port: 80
+      traefik.http.routers.cr.service: cr-svc
 
-      traefik.http.routers.cr.middlewares: limit@docker
-      traefik.http.middlewares.limit.buffering.maxRequestBodyBytes: 10737418240
-      traefik.http.middlewares.limit.buffering.memRequestBodyBytes: 200000000
-      traefik.http.middlewares.limit.buffering.maxResponseBodyBytes: 10737418240
-      traefik.http.middlewares.limit.buffering.memResponseBodyBytes: 200000000
+      traefik.http.services.cr-svc.loadbalancer.server.port: "80"
+
+      # Namespaced middleware so this stack does not collide with other services using "limit"
+      traefik.http.routers.cr.middlewares: cr-limit@docker
+      traefik.http.middlewares.cr-limit.buffering.maxRequestBodyBytes: "10737418240"
+      traefik.http.middlewares.cr-limit.buffering.memRequestBodyBytes: "200000000"
+      traefik.http.middlewares.cr-limit.buffering.maxResponseBodyBytes: "10737418240"
+      traefik.http.middlewares.cr-limit.buffering.memResponseBodyBytes: "200000000"
 
 networks:
   traefik_proxy:
