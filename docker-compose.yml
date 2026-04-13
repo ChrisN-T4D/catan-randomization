@@ -17,6 +17,8 @@ services:
       dockerfile: Dockerfile
     container_name: catan-randomization
     restart: unless-stopped
+    environment:
+      HOST: ${HOST}
     networks:
       - traefik_proxy
     healthcheck:
