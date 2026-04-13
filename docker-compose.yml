@@ -1,8 +1,7 @@
 # Static Catan board — Traefik only (no host ports). Build locally (no registry image).
 #
-# Stack env in Portainer (recommended):
+# Required — set in Portainer stack environment or a local .env file (not committed):
 #   HOST=your.public.hostname
-# If HOST is omitted, the default below is used so Traefik still gets a valid Host() rule.
 #
 # Checklist if the site does not load:
 #   - DNS A/AAAA for HOST → your Traefik public IP
@@ -31,7 +30,7 @@ services:
       traefik.docker.network: traefik_proxy
 
       traefik.http.routers.cr.entrypoints: websecure
-      traefik.http.routers.cr.rule: Host(`${HOST:-your.public.hostname}`)
+      traefik.http.routers.cr.rule: Host(`${HOST}`)
       traefik.http.routers.cr.tls.certresolver: le
       traefik.http.routers.cr.service: cr-svc
 
